@@ -1,0 +1,37 @@
+[app]
+name = "qnsvoice"
+description = "Queens voice/news platform"
+domain = "qnsvoice.local"
+version = "0.1.0"
+
+[server]
+host = "0.0.0.0"
+port = 3000
+
+[database]
+url = "${DATABASE_URL}"
+pool_size = 10
+
+[redis]
+url = "${REDIS_URL}"
+
+[features]
+enable_cms = true
+enable_crm = false
+enable_social = false
+enable_billing = false
+enable_search = false
+enable_notifications = true
+
+[plugins]
+active = []
+
+[security]
+jwt_secret = "${JWT_SECRET}"
+session_timeout_hours = 24
+
+[branding]
+logo = "/assets/qnsvoice-logo.svg"
+primary_color = "#2563EB"
+secondary_color = "#1E40AF"
+font_family = "Inter, sans-serif"
