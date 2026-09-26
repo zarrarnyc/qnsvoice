@@ -1,0 +1,47 @@
+# QNS Voice — Coolify contract (production).
+#
+# Contract points this file MUST honour (gothicans/nychaparty patterns):
+#   1. Traefik owns TLS. No service binds host 80/443, and no service publishes
+#      a host port at all.
+#   2. `expose`, never `ports`.
+#   3. Healthchecks on every long-running service.
+#   4. Config is env-only. No secrets in this file.
+#   5. Non-root containers; writable mounts are limited to volumes.
+#   6. Coolify attaches the platform domain to THIS service.
+#
+# This is intentionally minimal for the "coming soon" launch. Future iterations
+# will add qnsvoice-edge (Caddy), qnsvoice-api (renamed from this service),
+# qnsvoice-db (Postgres) and qnsvoice-redis (Redis).
+
+name: qnsvoice
+
+services:
+  qnsvoice:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: qnsvoice:${QNSVOICE_IMAGE_TAG:-dev}
+    expose: ["7200"]
+    env_file:
+      # Coolify materialises the resource's environment into `.env` before it
+      # deploys, and its own compose parser accepts only this list form.
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:7200/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    networks: [coolify]
+
+networks:
+  # Created by Coolify for Traefik. `external: true` because Coolify owns its
+  # lifecycle — compose must attach to it, never try to create it.
+  coolify:
+    external: true

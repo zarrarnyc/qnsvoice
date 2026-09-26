@@ -1,0 +1,17 @@
+/target
+**/*.rs.bk
+Cargo.lock.bak
+.env
+.env.*
+!.env.example
+.git
+.gitmodules
+.github
+*.md
+docs/
+AGENTS.md
+Dockerfile
+docker-compose*.yml
+.dockerignore
+.verdent
+.verdentc.json
