@@ -85,12 +85,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         app.load_plugin(plugin_name).await?;
     }
 
-    app.router_mut()
+    let router = std::mem::take(app.router_mut())
         .route("/", get(index_handler))
         .route("/health", get(health_handler));
+    *app.router_mut() = router;
 
     info!("Running database migrations...");
-    app.run_migrations().await?;
+    if let Err(e) = app.run_migrations().await {
+        // Coming-soon phase: the page must stay up even without a database.
+        tracing::warn!("Database unavailable, continuing without it: {}", e);
+    }
 
     let addr = format!("0.0.0.0:{}", config.server.port);
     info!("qnsvoice listening on {}", addr);
