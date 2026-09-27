@@ -20,7 +20,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: qnsvoice:${QNSVOICE_IMAGE_TAG:-dev}
     expose: ["7200"]
     env_file:
       # Coolify materialises the resource's environment into `.env` before it
@@ -38,9 +37,13 @@ services:
         limits:
           cpus: "1.0"
           memory: 512M
-    networks: [coolify]
+    # `coolify` as well as `qnsvoice`: Coolify's Traefik lives on the `coolify`
+    # network, so without it the proxy has no route to the container.
+    networks: [qnsvoice, coolify]
 
 networks:
+  qnsvoice:
+    driver: bridge
   # Created by Coolify for Traefik. `external: true` because Coolify owns its
   # lifecycle — compose must attach to it, never try to create it.
   coolify:
