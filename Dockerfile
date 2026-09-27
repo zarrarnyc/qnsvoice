@@ -34,8 +34,6 @@ RUN mkdir -p src && echo "fn main() {}" > src/main.rs \
 # Copy the real sources.
 COPY src ./src
 COPY config ./config
-COPY plugins ./plugins
-COPY migrations ./migrations
 
 # Final build (only the app crate recompiles).
 RUN touch src/main.rs && cargo build --release --locked
@@ -59,9 +57,11 @@ WORKDIR /app
 
 COPY --from=builder /app/target/release/qnsvoice /usr/local/bin/qnsvoice
 
-# config/ and plugins/ are baked in. Do not bind-mount over them in production.
+# config/ is baked in. Do not bind-mount over it in production.
 COPY --from=builder /app/config ./config
-COPY --from=builder /app/plugins ./plugins
+
+# Runtime expects these paths to exist even while they are empty.
+RUN mkdir -p /app/plugins /app/migrations
 
 # Writable path for future uploads, owned by the runtime user.
 RUN mkdir -p /app/uploads && chown -R app:app /app
